@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 const prodCommentRouter = express.Router();
 
 prodCommentRouter.get('/prodComment/all', async (req, res, next) => {
-  const comment = await prisma.prodComment.findMany({
+  const comments = await prisma.prodComment.findMany({
     select: {
     id: true, 
     productId : true,
@@ -14,7 +14,7 @@ prodCommentRouter.get('/prodComment/all', async (req, res, next) => {
     updatedAt: true,
     },
   });
-  res.send(comment);
+  res.send(comments);
 });
 
 prodCommentRouter.route('/prodComment')
@@ -42,10 +42,8 @@ prodCommentRouter.route('/prodComment')
     const comments = await prisma.prodComment.findMany(findManyArgs);
     let message
     if(comments[2]) {
-      console.log(`다음 커서는 ${comments[2].id}입니다.`);
       message = `다음 커서는 ${comments[2].id}입니다.`;
     } else {
-      console.log('다음 커서가 없습니다.')
       message = '다음 커서가 없습니다.';
     }
     res.send({commnts: comments, message: message});
@@ -62,17 +60,22 @@ prodCommentRouter.route('/prodComment/:id')
     try {
       const { id } = req.params;
       const commnt = await prisma.prodComment.update({
-        where: { id: parseInt(id), },
+        where: { id: parseInt(id) },
         data: req.body,
       });
-        if (!commnt) {
+      if (!commnt) {
         const err = new Error('ID를 찾을 수 없습니다.');
         err.status = 404;
         return next(err);
-      };
+      }
       res.send(commnt);
-    } catch {
-      next();
+    } catch (err) {
+      if (err.code === 'P2025') {
+        const error = new Error('ID not found');
+        error.status = 404;
+        return next(error);
+      }
+      next(err);
     }
   })
   .delete(async (req, res, next) => {
@@ -82,13 +85,15 @@ prodCommentRouter.route('/prodComment/:id')
         where: { id: parseInt(id) },
       });
       res.sendStatus(204);
-    } catch {
-      next();
+    } catch (err) {
+      if (err.code === 'P2025') {
+        const error = new Error('ID not found');
+        error.status = 404;
+        return next(error);
+      }
+      next(err);
     }
   });
-
-
-
 
 
 export default prodCommentRouter;
