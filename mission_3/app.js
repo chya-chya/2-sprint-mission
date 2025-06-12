@@ -18,10 +18,10 @@ const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
 
-app.use('', productRouter);
-app.use('', articleRouter);
-app.use('', artiCommentRouter);
-app.use('', prodCommentRouter);
+app.use('/product', productRouter);
+app.use('/article', articleRouter);
+app.use('/artiComment', artiCommentRouter);
+app.use('prodComment', prodCommentRouter);
 app.use('/file', fileRouter);
 app.use('/file', express.static('uploads'));
 app.use('', notFoundErrorHandeler);

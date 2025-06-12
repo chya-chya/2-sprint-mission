@@ -5,7 +5,7 @@ const app = express();
 const prisma = new PrismaClient();
 const artiCommentRouter = express.Router();
 
-  artiCommentRouter.get('/artiComment/all', async (req, res, next) => {
+  artiCommentRouter.get('/all', async (req, res, next) => {
   const comments = await prisma.ArtiComment.findMany({
     select: {
     id: true, 
@@ -19,7 +19,7 @@ const artiCommentRouter = express.Router();
 });
 
 
-artiCommentRouter.route('/artiComment')
+artiCommentRouter.route('')
   .get(async (req, res, next) => {
     let cursor = req.query.cursor ? parseInt(req.query.cursor) : undefined;
     const articleId = req.query.articleId ? req.query.articleId : undefined;
@@ -57,7 +57,7 @@ artiCommentRouter.route('/artiComment')
     res.send(Comment);
   });
 
-artiCommentRouter.route('/artiComment/:id')
+artiCommentRouter.route('/:id')
   .patch(async (req, res, next) =>{
     try {
       const { id } = req.params;
