@@ -9,7 +9,7 @@ import {
 const prisma = new PrismaClient();
 const articleRouter = express.Router();
 
-articleRouter.route('/article')
+articleRouter.route('')
   .get(async (req, res, next) => {
     const { offset = 0, limit = 10, sort = 'recent', search = ''} = req.query;
     let orderBy;
@@ -43,7 +43,7 @@ articleRouter.route('/article')
     });
     if (article.length === 0) {
         return res.send({ message : `${search}로 검색된 게시글이 없습니다. (offset: ${offset})`});
-    };
+    }
     res.send(article);
   })
   .post(async (req, res, next) => {
@@ -62,7 +62,7 @@ articleRouter.route('/article')
     }
   });
 
-articleRouter.route('/article/:id')
+articleRouter.route('/:id')
   .get(async (req, res, next) => {
     const { id } = req.params;
     const article = await prisma.article.findUnique({
@@ -79,7 +79,7 @@ articleRouter.route('/article/:id')
       const err = new Error('ID를 찾을 수 없습니다.');
       err.status = 404;
       return next(err);
-    };
+    }
     res.send(article);
   })
   .patch(async (req, res, next) =>{
@@ -91,17 +91,17 @@ articleRouter.route('/article/:id')
         data: req.body,
       });
         if (!article) {
-        const err = new Error('ID를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      };
+          const err = new Error('ID를 찾을 수 없습니다.');
+          err.status = 404;
+          return next(err);
+        }
       res.send(article);
     } catch (err) {
       if (err instanceof StructError) {
-          console.log('****************************StructError 발생!****************************');
-          return next(err);
-        }
-        next(err);
+        console.log('****************************StructError 발생!****************************');
+        return next(err);
+      }
+      next(err);
     }
   })
   .delete(async (req, res, next) => {
@@ -111,16 +111,15 @@ articleRouter.route('/article/:id')
         where: { id },
       });
       res.sendStatus(204);
-    } catch {
+    } catch (err) {
+      if (err.code === 'P2025') { // Prisma의 RecordNotFound 에러
+        const error = new Error('ID를 찾을 수 없습니다.');
+        error.status = 404;
+        return next(error);
+      }
       next()
     }
   });
-
-
-
-
-
-
 
 
 export default articleRouter;

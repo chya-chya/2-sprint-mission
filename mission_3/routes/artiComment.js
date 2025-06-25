@@ -5,8 +5,8 @@ const app = express();
 const prisma = new PrismaClient();
 const artiCommentRouter = express.Router();
 
-  artiCommentRouter.get('/artiComment/all', async (req, res, next) => {
-  const comment = await prisma.ArtiComment.findMany({
+  artiCommentRouter.get('/all', async (req, res, next) => {
+  const comments = await prisma.ArtiComment.findMany({
     select: {
     id: true, 
     articleId: true,
@@ -15,11 +15,11 @@ const artiCommentRouter = express.Router();
     updatedAt: true,
     },
   });
-  res.send(comment);
+  res.send(comments);
 });
 
 
-artiCommentRouter.route('/artiComment')
+artiCommentRouter.route('')
   .get(async (req, res, next) => {
     let cursor = req.query.cursor ? parseInt(req.query.cursor) : undefined;
     const articleId = req.query.articleId ? req.query.articleId : undefined;
@@ -44,10 +44,8 @@ artiCommentRouter.route('/artiComment')
     const comments = await prisma.ArtiComment.findMany(findManyArgs);
     let message
     if(comments[2]) {
-      console.log(`다음 커서는 ${comments[2].id}입니다.`);
       message = `다음 커서는 ${comments[2].id}입니다.`;
     } else {
-      console.log('다음 커서가 없습니다.')
       message = '다음 커서가 없습니다.';
     }
     res.send({commnts: comments, message: message});
@@ -59,7 +57,7 @@ artiCommentRouter.route('/artiComment')
     res.send(Comment);
   });
 
-artiCommentRouter.route('/artiComment/:id')
+artiCommentRouter.route('/:id')
   .patch(async (req, res, next) =>{
     try {
       const { id } = req.params;
@@ -67,15 +65,20 @@ artiCommentRouter.route('/artiComment/:id')
         where: { id: parseInt(id) },
         data: req.body,
       });
-        if (!commnt) {
+      if (!commnt) {
         const err = new Error('ID를 찾을 수 없습니다.');
         err.status = 404;
         return next(err);
-      };
+      }
       res.send(commnt);
-    } catch {
-      next();
-    } 
+    } catch (err) {
+      if (err.code === 'P2025') {
+        const error = new Error('ID not found');
+        error.status = 404;
+        return next(error);
+      }
+      next(err);
+    }
   })
   .delete(async (req, res, next) => {
     try {
@@ -84,12 +87,15 @@ artiCommentRouter.route('/artiComment/:id')
         where: { id : parseInt(id) },
       });
       res.sendStatus(204);
-    } catch {
-      next();
+    } catch (err) {
+      if (err.code === 'P2025') {
+        const error = new Error('ID not found');
+        error.status = 404;
+        return next(error);
+      }
+      next(err);
     }
   });
-
-
 
 
 export default artiCommentRouter;
