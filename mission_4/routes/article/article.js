@@ -1,12 +1,12 @@
 import express from 'express';
 import { assert, StructError } from 'superstruct';
-import prisma from '../utills/prisma.js';
+import prisma from '../../utills/prisma.js';
 import { 
   CreateArticle,
   PatchArticle 
-} from '../structs.js';
-import passport from '../lib/passport/index.js';
-import { optionalAuth } from '../utills/auth.js';
+} from '../../structs.js';
+import passport from '../../lib/passport/index.js';
+import { optionalAuth } from '../../utills/auth.js';
 
 const articleRouter = express.Router();
 

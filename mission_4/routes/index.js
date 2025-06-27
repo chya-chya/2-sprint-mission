@@ -1,13 +1,13 @@
 import express from 'express';
-import productRouter from './product.js';
-import articleRouter from './article.js';
-import articleCommentRouter from './articleComment.js';
-import productCommentRouter from './productComment.js';
+import productRouter from './product/product.js';
+import articleRouter from './article/article.js';
+import articleCommentRouter from './article/articleComment.js';
+import productCommentRouter from './product/productComment.js';
 import fileRouter from './file.js';
-import authRouter from './auth.js';
-import userRouter from './user.js';
-import productLikedRouter from './productLiked.js';
-import articleLikedRouter from './articleLiked.js';
+import authRouter from './user/auth.js';
+import userRouter from './user/user.js';
+import productLikedRouter from './product/productLiked.js';
+import articleLikedRouter from './article/articleLiked.js';
 const router = express.Router();
 
 router.use('/product', productRouter);

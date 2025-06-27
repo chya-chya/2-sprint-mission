@@ -1,6 +1,6 @@
 import express from 'express';
-import prisma from '../utills/prisma.js';
-import passport from '../lib/passport/index.js';
+import prisma from '../../utills/prisma.js';
+import passport from '../../lib/passport/index.js';
 
 const articleLikedRouter = express.Router();
 

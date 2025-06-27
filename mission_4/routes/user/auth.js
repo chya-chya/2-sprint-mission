@@ -1,11 +1,11 @@
 import express from 'express';
-import prisma from '../utills/prisma.js';
+import prisma from '../../utills/prisma.js';
 import bcrypt from 'bcrypt';
 import isemail from 'isemail';
-import passport from '../lib/passport/index.js';
-import { generateTokens } from '../utills/token.js';
+import passport from '../../lib/passport/index.js';
+import { generateTokens } from '../../utills/token.js';
 import dotenv from 'dotenv';
-import { loginLimiter } from '../utills/loginLimiter.js';
+import { loginLimiter } from '../../utills/loginLimiter.js';
 
 
 dotenv.config();

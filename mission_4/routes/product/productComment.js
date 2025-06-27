@@ -1,24 +1,24 @@
 import express from 'express';
-import prisma from '../utills/prisma.js';
-import passport from '../lib/passport/index.js';
+import prisma from '../../utills/prisma.js';
+import passport from '../../lib/passport/index.js';
 
-const articleCommentRouter = express.Router();
+const productCommentRouter = express.Router();
 
-
-articleCommentRouter.get('/', getArticleComments);
-articleCommentRouter.post('/:articleId', 
+productCommentRouter.get('/', getProductComments);
+productCommentRouter.post('/:productId', 
   passport.authenticate('access-token', { session: false }), 
-  createArticleComment);
-articleCommentRouter.patch('/:articleId', 
+  createProductComment);
+productCommentRouter.patch('/:productId', 
   passport.authenticate('access-token', { session: false }), 
-  updateArticleComment);
-articleCommentRouter.delete('/:articleId', 
+  updateProductComment);
+productCommentRouter.delete('/:productId', 
   passport.authenticate('access-token', { session: false }), 
-  deleteArticleComment);
+  deleteProductComment);
 
-async function getArticleComments(req, res, next) {
+
+async function getProductComments(req, res, next) {
   let cursor = req.query.cursor ? parseInt(req.query.cursor) : undefined;
-  const articleId = req.query.articleId ? req.query.articleId : undefined;
+  const productId = req.query.productId ? req.query.productId : undefined;
   const findManyArgs = {
     take: 3,
     orderBy: {
@@ -30,14 +30,14 @@ async function getArticleComments(req, res, next) {
       createdAt: true,
     },
     where: {
-      articleId : articleId
+      productId : productId
     },
   };
   if (cursor) {
     findManyArgs.cursor = { id: cursor };
     findManyArgs.skip = 1;
   }
-  const comments = await prisma.ArticleComment.findMany(findManyArgs);
+  const comments = await prisma.productComment.findMany(findManyArgs);
   let message
   if(comments[2]) {
     message = `다음 커서는 ${comments[2].id}입니다.`;
@@ -47,21 +47,21 @@ async function getArticleComments(req, res, next) {
   res.send({commnts: comments, message: message});
 }
 
-async function createArticleComment(req, res, next) {
-  const Comment = await prisma.articleComment.create({
+async function createProductComment(req, res, next) {
+  const commnt = await prisma.productComment.create({
     data: {
       ...req.body,
       userId: req.user.id,
-      articleId: parseInt(req.params.articleId),
-    },
+      productId:  parseInt(req.params.productId),
+    }
   });
-  res.send(Comment);
+  res.send(commnt);
 }
 
-async function updateArticleComment(req, res, next) {
+async function updateProductComment(req, res, next) {
   try {
-    const id = parseInt(req.params.articleId);
-    const comment = await prisma.articleComment.findUnique({ where: { id: id } });
+    const id = parseInt(req.params.productId);
+    const comment = await prisma.productComment.findUnique({ where: { id: parseInt(id) } });
     if (!comment) {
       const err = new Error('comment를 찾을 수 없습니다.');
       err.status = 404;
@@ -72,7 +72,7 @@ async function updateArticleComment(req, res, next) {
       err.status = 401;
       return next(err);
     }
-    const updatedComment = await prisma.articleComment.update({
+    const updatedComment = await prisma.productComment.update({
       where: { id: id },
       data: req.body,
     });
@@ -87,10 +87,10 @@ async function updateArticleComment(req, res, next) {
   }
 }
 
-async function deleteArticleComment(req, res, next) {
+async function deleteProductComment(req, res, next) {
   try {
-    const id = parseInt(req.params.articleId);
-    const comment = await prisma.articleComment.findUnique({ where: { id: id } });
+    const id = parseInt(req.params.productId);
+    const comment = await prisma.productComment.findUnique({ where: { id: id } });
     if (!comment) {
       const err = new Error('comment를 찾을 수 없습니다.');
       err.status = 404;
@@ -101,8 +101,8 @@ async function deleteArticleComment(req, res, next) {
       err.status = 401;
       return next(err);
     }
-    await prisma.articleComment.delete({
-      where: { id : id },
+    await prisma.productComment.delete({
+      where: { id: id },
     });
     res.sendStatus(204);
   } catch (err) {
@@ -115,5 +115,4 @@ async function deleteArticleComment(req, res, next) {
   }
 }
 
-
-export default articleCommentRouter;
+export default productCommentRouter;
