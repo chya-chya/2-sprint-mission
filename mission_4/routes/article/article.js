@@ -83,11 +83,7 @@ async function createArticle(req, res, next) {
     });
     res.send(article);
   } catch (err) {
-      if (err instanceof StructError) {
-        console.log('****************************StructError 발생!****************************');
-        return next(err);
-      }
-      next(err);
+      return next(err);
   }
 }
 
@@ -142,11 +138,7 @@ async function updateArticle(req, res, next) {
     });
     res.send(updatedArticle);
   } catch (err) {
-    if (err instanceof StructError) {
-      console.log('****************************StructError 발생!****************************');
-      return next(err);
-    }
-    next(err);
+    return next(err);
   }
 }
 

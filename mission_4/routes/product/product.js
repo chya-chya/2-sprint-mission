@@ -87,11 +87,7 @@ async function createProduct(req, res, next) {
     });
     res.send(product);
   } catch (err) {
-    if (err instanceof StructError) {
-      console.log('****************************StructError 발생!****************************');
-      return next(err);
-    }
-    next(err);
+    return next(err);
   }
 }
 
@@ -150,11 +146,7 @@ async function updateProduct(req, res, next) {
       });
       res.send(updatedProduct);
     } catch (err) {
-      if (err instanceof StructError) {
-        console.log('****************************StructError 발생!****************************');
-        return next(err);
-      }
-      next(err);
+      return next(err);
     }
 }
 
@@ -188,4 +180,4 @@ async function deleteProduct(req, res, next) {
 }
 
 
-export default productRouter;
+export default productRouter;git 
