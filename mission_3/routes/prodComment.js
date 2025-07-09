@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const prodCommentRouter = express.Router();
 
-prodCommentRouter.get('/prodComment/all', async (req, res, next) => {
+prodCommentRouter.get('/all', async (req, res, next) => {
   const comments = await prisma.prodComment.findMany({
     select: {
     id: true, 
@@ -17,7 +17,7 @@ prodCommentRouter.get('/prodComment/all', async (req, res, next) => {
   res.send(comments);
 });
 
-prodCommentRouter.route('/prodComment')
+prodCommentRouter.route('')
   .get(async (req, res, next) => {
     let cursor = req.query.cursor ? parseInt(req.query.cursor) : undefined;
     const productId = req.query.productId ? req.query.productId : undefined;
@@ -55,7 +55,7 @@ prodCommentRouter.route('/prodComment')
     res.send(commnt);
   });
 
-prodCommentRouter.route('/prodComment/:id')
+prodCommentRouter.route('/:id')
   .patch(async (req, res, next) =>{
     try {
       const { id } = req.params;

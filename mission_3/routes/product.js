@@ -9,7 +9,7 @@ import {
 const prisma = new PrismaClient();
 const productRouter = express.Router();
 
-productRouter.route('/product')
+productRouter.route('')
   .get(async (req, res, next) => {
     const { offset = 0, limit = 10, sort = 'recent', search = ''} = req.query;
     let orderBy;
@@ -64,7 +64,7 @@ productRouter.route('/product')
     }
   });
 
-productRouter.route('/product/:id')
+productRouter.route('/:id')
   .get(async (req, res, next) => {
     const { id } = req.params;
     const product = await prisma.product.findUnique({
