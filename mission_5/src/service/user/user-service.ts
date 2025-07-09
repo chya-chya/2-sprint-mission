@@ -1,8 +1,8 @@
 import express from 'express';
-import prisma from '../../utills/prisma.js';
+import prisma from '../../utills/prisma';
 import bcrypt from 'bcrypt';
 
-class userService {
+class UserService {
   static getUser: express.RequestHandler = async(req, res, next) => {
     try {
       const user = await prisma.user.findUnique({ where: { id: req.user!.id}});

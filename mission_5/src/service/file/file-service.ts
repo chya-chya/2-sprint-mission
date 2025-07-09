@@ -3,7 +3,7 @@ import multer from 'multer';
 
 const upload = multer({ dest: 'uploads/'});
 
-class fileService {
+class FileService {
   static uploadFile: express.RequestHandler = async (req, res, next) => {
     try {
       const path = `/file/${req.file?.filename}`;
@@ -14,4 +14,4 @@ class fileService {
   }
 }
 
-export default fileService;
+export default FileService;

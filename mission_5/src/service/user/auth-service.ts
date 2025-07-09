@@ -1,15 +1,13 @@
 import express from 'express';
-import prisma from '../../utills/prisma.js';
+import prisma from '../../utills/prisma';
 import bcrypt from 'bcrypt';
 import isemail from 'is-email';
-import passport from '../../lib/passport/index.js';
-import { generateTokens } from '../../utills/token.js';
+import { generateTokens } from '../../utills/token';
 import dotenv from 'dotenv';
-import { loginLimiter } from '../../utills/loginLimiter.js';
 
 dotenv.config();
 
-class authService {
+class AuthService {
   static register: express.RequestHandler = async (req, res, next) => {
     try {
       const { email, nickname, password } = req.body;

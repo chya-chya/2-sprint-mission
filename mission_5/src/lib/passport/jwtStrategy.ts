@@ -1,5 +1,5 @@
-import { Strategy as JwtStrategy } from 'passport-jwt';
-import prisma from '../utills/prisma';
+import { Strategy as JwtStrategy, VerifiedCallback } from 'passport-jwt';
+import prisma from '../../utills/prisma';
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
@@ -14,11 +14,14 @@ const refreshTokenOptions = {
   secretOrKey: process.env.JWT_REFRESH_TOKEN_SECRET as string,
 };
 
-const jwtVerify = async (payload, done) => {
+const jwtVerify = async (payload: passport.payload, done: VerifiedCallback) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: payload.sub },
     });
+    if (!user) {
+      return done(null, false);
+    }
     done(null, user);
   } catch (error) {
     done(error, false);

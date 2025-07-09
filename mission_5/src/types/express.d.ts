@@ -1,3 +1,5 @@
+import express from "express";
+
 declare global {
   namespace Express {
     interface User {
@@ -8,5 +10,3 @@ declare global {
     }
   }
 }
-
-export {};

@@ -1,6 +1,6 @@
 import express from 'express';
 
-export const notFoundErrorHandeler: express.ErrorRequestHandler = (req, res, next) => {
+export const notFoundErrorHandeler: express.RequestHandler = (req, res, next) => {
   res.status(404).send('요청하신 주소를 찾을 수 없습니다.');
 };
 

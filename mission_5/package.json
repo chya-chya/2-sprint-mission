@@ -5,8 +5,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "npx prisma generate && npx prisma migrate dev",
-    "dev": "nodemon --watch src src/app.ts",
-    "start": "node app.js",
+    "dev": "nodemon --watch src --exec ts-node src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
     "seed": "node prisma/seed.js"
   },
   "keywords": [],
@@ -27,6 +28,7 @@
     "@types/passport-local": "^1.0.38",
     "nodemon": "^3.0.1",
     "prisma": "^6.8.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
@@ -46,6 +48,5 @@
     "passport-local": "^1.0.0",
     "superstruct": "^1.0.3"
   },
-  "type": "module",
   "description": ""
 }

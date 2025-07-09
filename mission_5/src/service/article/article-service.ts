@@ -5,7 +5,7 @@ import { Article } from '@prisma/client';
 import { 
   CreateArticle,
   PatchArticle 
-} from '../../../structs';
+} from '../../utills/structs';
 
 class ArticleService {
 

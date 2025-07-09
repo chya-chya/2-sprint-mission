@@ -1,8 +1,9 @@
 import express from 'express';
 import prisma from '../../utills/prisma';
 import { Prisma } from '@prisma/client';
+import { AppError } from '../../utills/AppError';
 
-class articleCommentService {
+class ArticleCommentService {
   static getArticleComments: express.RequestHandler = async (req, res, next) => {
     let cursor = req.query.cursor ? Number(req.query.cursor) : undefined;
     const findManyArgs: Prisma.ArticleCommentFindManyArgs = {
@@ -46,12 +47,12 @@ class articleCommentService {
       const id = parseInt(req.params.articleId);
       const comment = await prisma.articleComment.findUnique({ where: { id: id } });
       if (!comment) {
-        const err = new Error('comment를 찾을 수 없습니다.');
+        const err = new AppError('comment를 찾을 수 없습니다.');
         err.status = 404;
         return next(err);
       }
       if (comment.userId !== req.user!.id) {
-        const err = new Error('인증되지 않은 사용자입니다.');
+        const err = new AppError('인증되지 않은 사용자입니다.');
         err.status = 401;
         return next(err);
       }
@@ -61,8 +62,8 @@ class articleCommentService {
       });
       res.send(updatedComment);
     } catch (err) {
-      if (err.code === 'P2025') {
-        const error = new Error('ID not found');
+      if ((err as AppError).code === 'P2025') {
+        const error = new AppError('ID not found');
         error.status = 404;
         return next(error);
       }
@@ -70,17 +71,17 @@ class articleCommentService {
     }
   }
 
-  async function deleteArticleComment(req, res, next) {
+  static deleteArticleComment: express.RequestHandler = async (req, res, next) => {
     try {
       const id = parseInt(req.params.articleId);
       const comment = await prisma.articleComment.findUnique({ where: { id: id } });
       if (!comment) {
-        const err = new Error('comment를 찾을 수 없습니다.');
+        const err = new AppError('comment를 찾을 수 없습니다.');
         err.status = 404;
         return next(err);
       }
-      if (comment.userId !== req.user.id) {
-        const err = new Error('인증되지 않은 사용자입니다.');
+      if (comment.userId !== req.user!.id) {
+        const err = new AppError('인증되지 않은 사용자입니다.');
         err.status = 401;
         return next(err);
       }
@@ -89,8 +90,8 @@ class articleCommentService {
       });
       res.sendStatus(204);
     } catch (err) {
-      if (err.code === 'P2025') {
-        const error = new Error('ID not found');
+      if ((err as AppError).code === 'P2025') {
+        const error = new AppError('ID not found');
         error.status = 404;
         return next(error);
       }
@@ -99,4 +100,4 @@ class articleCommentService {
   }
 }
 
-export default articleCommentSrvice;
+export default ArticleCommentService;

@@ -1,5 +1,5 @@
 import express from 'express';
-import prisma from '../../utills/prisma.js';
+import prisma from '../../utills/prisma';
 
 class ArticleLikedService {
 
@@ -7,7 +7,7 @@ class ArticleLikedService {
     try {
       const articleLiked = await prisma.articleLiked.findMany({
         where: {
-          userId: parseInt(req.user!.id),
+          userId: Number(req.user!.id),
         },
       });
       res.send(articleLiked);
@@ -21,8 +21,8 @@ class ArticleLikedService {
       const articleLiked = await prisma.articleLiked.findUnique({
         where: {
           userId_articleId: {
-            userId: parseInt(req.user!.id),
-            articleId: parseInt(req.params.articleId),
+            userId: Number(req.user!.id),
+            articleId: Number(req.params.articleId),
           },
         },
       });
@@ -31,8 +31,8 @@ class ArticleLikedService {
       }
       await prisma.articleLiked.create({
         data: {
-          userId: parseInt(req.user!.id),
-          articleId: parseInt(req.params.articleId),
+          userId: Number(req.user!.id),
+          articleId: Number(req.params.articleId),
         },
       });
       res.send({ message: '좋아요를 눌렀습니다.' });
@@ -46,8 +46,8 @@ class ArticleLikedService {
       const articleLiked = await prisma.articleLiked.findUnique({
         where: {
           userId_articleId: {
-            userId: parseInt(req.user!.id),
-            articleId: parseInt(req.params.articleId),
+            userId: Number(req.user!.id),
+            articleId: Number(req.params.articleId),
           },
         },
       });
@@ -57,8 +57,8 @@ class ArticleLikedService {
       await prisma.articleLiked.delete({
         where: {
           userId_articleId: {
-            userId: parseInt(req.user!.id),
-            articleId: parseInt(req.params.articleId),
+            userId: Number(req.user!.id),
+            articleId: Number(req.params.articleId),
           },
         },
       });

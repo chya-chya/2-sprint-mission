@@ -1,5 +1,5 @@
 import express from 'express';
-import prisma from '../../utills/prisma.js';
+import prisma from '../../utills/prisma';
 
 class ProductLikedService {
 

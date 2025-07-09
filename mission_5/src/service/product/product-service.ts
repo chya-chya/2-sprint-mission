@@ -1,7 +1,7 @@
 import express from 'express';
-import prisma from '../../utills/prisma.js';
+import prisma from '../../utills/prisma';
 import { assert } from 'superstruct';
-import { CreateProduct, PatchProduct } from '../../../structs.js';
+import { CreateProduct, PatchProduct } from '../../utills/structs';
 
 class ProductService {
   

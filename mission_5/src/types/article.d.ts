@@ -1,8 +1,9 @@
-import prisma from '../src/utills/prisma';
-
-
-declare module '@prisma/client' {
-  interface Article {
-    isLiked?: boolean;
+declare global {
+  namespace Article {
+    interface Article {
+      isLiked?: boolean;
+    }
   }
 }
+
+export {};
