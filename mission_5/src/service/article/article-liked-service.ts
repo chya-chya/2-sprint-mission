@@ -1,70 +1,41 @@
 import express from 'express';
 import prisma from '../../utills/prisma';
+import ArticleLikedRepository from '../../repository/article/article-liked-repository';
 
 class ArticleLikedService {
 
   static getArticleLiked: express.RequestHandler = async (req, res, next) => {
     try {
-      const articleLiked = await prisma.articleLiked.findMany({
-        where: {
-          userId: Number(req.user!.id),
-        },
-      });
+      const articleLiked = await ArticleLikedRepository.getArticleLiked(Number(req.params.articleId), Number(req.user!.id));
       res.send(articleLiked);
     } catch(err) {
-      next(err);
+      next(err as Error);
     } 
   }
     
   static createArticleLiked: express.RequestHandler = async (req, res, next) => {
     try {
-      const articleLiked = await prisma.articleLiked.findUnique({
-        where: {
-          userId_articleId: {
-            userId: Number(req.user!.id),
-            articleId: Number(req.params.articleId),
-          },
-        },
-      });
-      if (articleLiked) {
+      const articleLiked = await ArticleLikedRepository.getArticleLiked(Number(req.params.articleId), Number(req.user!.id));
+      if (articleLiked !== null) {
         return next(new Error('이미 좋아요를 눌렀습니다.'));
       }
-      await prisma.articleLiked.create({
-        data: {
-          userId: Number(req.user!.id),
-          articleId: Number(req.params.articleId),
-        },
-      });
+      await ArticleLikedRepository.createArticleLiked(Number(req.params.articleId), Number(req.user!.id));
       res.send({ message: '좋아요를 눌렀습니다.' });
     } catch(err) {
-      next(err);
+      next(err as Error);
     }
   }
 
   static deleteArticleLiked: express.RequestHandler = async (req, res, next) => {
     try {
-      const articleLiked = await prisma.articleLiked.findUnique({
-        where: {
-          userId_articleId: {
-            userId: Number(req.user!.id),
-            articleId: Number(req.params.articleId),
-          },
-        },
-      });
+      const articleLiked = await ArticleLikedRepository.getArticleLiked(Number(req.params.articleId), Number(req.user!.id));
       if (!articleLiked) {
         return next(new Error('좋아요를 찾을 수 없습니다.'));
       }
-      await prisma.articleLiked.delete({
-        where: {
-          userId_articleId: {
-            userId: Number(req.user!.id),
-            articleId: Number(req.params.articleId),
-          },
-        },
-      });
+      await ArticleLikedRepository.deleteArticleLiked(Number(req.params.articleId), Number(req.user!.id));
       res.send({ message: '좋아요를 취소했습니다.' });
     } catch(err) {
-      next(err);
+      next(err as Error);
     }
   }
 }

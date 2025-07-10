@@ -4,43 +4,47 @@ import articleCommentService from '../service/article/article-comment-service';
 import articleService from '../service/article/article-service';
 import { optionalAuth } from '../utills/auth';
 import passport from '../lib/passport/index';
-const articleController = express.Router();
 
-articleController.get('/', 
-  optionalAuth,
-  articleService.getArticles);
-articleController.get('/:articleId',
-  optionalAuth,
-  articleService.getArticleById);
-articleController.post('/',
-  passport.authenticate('access-token', { session: false }),
-  articleService.createArticle);
-articleController.patch('/:articleId',
-  passport.authenticate('access-token', { session: false }),
-  articleService.updateArticle);
-articleController.delete('/:articleId',
-  passport.authenticate('access-token', { session: false }),
-  articleService.deleteArticle);
+export const articleRoute = express.Router();
 
-articleController.get('/comments', articleCommentService.getArticleComments);
-articleController.post('/:articleId/comments',
+
+
+//articleCommentRoute
+articleRoute.get('/comment', articleCommentService.getArticleComments);
+articleRoute.post('/:articleId/comment',
   passport.authenticate('access-token', { session: false }),
   articleCommentService.createArticleComment);
-articleController.patch('/:articleId/comments',
+articleRoute.patch('/comment/:commentId',
   passport.authenticate('access-token', { session: false }),
   articleCommentService.updateArticleComment);
-articleController.delete('/:articleId/comments',
+articleRoute.delete('/comment/:commentId',
   passport.authenticate('access-token', { session: false }),
   articleCommentService.deleteArticleComment);
 
-articleController.get('/:articleId/liked',
+//articleLikedRoute
+articleRoute.get('/:articleId/liked',
   passport.authenticate('access-token', { session: false }),
   articleLikedService.getArticleLiked);
-articleController.post('/:articleId/liked',
+articleRoute.post('/:articleId/liked',
   passport.authenticate('access-token', { session: false }),
   articleLikedService.createArticleLiked);
-articleController.delete('/:articleId/liked',
+articleRoute.delete('/:articleId/liked',
   passport.authenticate('access-token', { session: false }),
   articleLikedService.deleteArticleLiked);
-
-export default articleController;
+  
+//articleroute
+articleRoute.get('', 
+  optionalAuth,
+  articleService.getArticles);
+articleRoute.get('/:articleId',
+  optionalAuth,
+  articleService.getArticleById);
+articleRoute.post('/',
+  passport.authenticate('access-token', { session: false }),
+  articleService.createArticle);
+articleRoute.patch('/:articleId',
+  passport.authenticate('access-token', { session: false }),
+  articleService.updateArticle);
+articleRoute.delete('/:articleId',
+  passport.authenticate('access-token', { session: false }),
+  articleService.deleteArticle);

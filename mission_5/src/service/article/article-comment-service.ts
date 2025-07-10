@@ -1,69 +1,50 @@
 import express from 'express';
-import prisma from '../../utills/prisma';
-import { Prisma } from '@prisma/client';
-import { AppError } from '../../utills/AppError';
+import ArticleCommentRepository from '../../repository/article/article-comment-repository';
 
 class ArticleCommentService {
   static getArticleComments: express.RequestHandler = async (req, res, next) => {
-    let cursor = req.query.cursor ? Number(req.query.cursor) : undefined;
-    const findManyArgs: Prisma.ArticleCommentFindManyArgs = {
-      take: 3,
-      orderBy: {
-        createdAt: 'asc'
-      },
-      select: {
-        id: true, 
-        content: true,
-        createdAt: true,
-      },
-    };
-    if (cursor) {
-      findManyArgs.cursor = { id: cursor };
-      findManyArgs.skip = 1;
-    }
-    const comments = await prisma.articleComment.findMany(findManyArgs);
+    const cursor = req.query.cursor ? Number(req.query.cursor) : undefined;
+    const orderBy: { createdAt: 'asc' | 'desc' } = { createdAt: 'asc' };
+    const comments = await ArticleCommentRepository.getArticleCommentlist(orderBy, cursor);
     let message
-    if(comments[2]) {
-      message = `다음 커서는 ${comments[2].id}입니다.`;
-    } else {
-      message = '다음 커서가 없습니다.';
+    if (!(comments instanceof Error)) {
+      if(comments[2]) {
+        message = `다음 커서는 ${comments[2].id}입니다.`;
+      } else {
+        message = '다음 커서가 없습니다.';
+      }
     }
-    res.send({commnts: comments, message: message});
+    res.send({message: message, comments: comments});
   }
 
   static createArticleComment: express.RequestHandler = async (req, res, next) => {
-    const Comment = await prisma.articleComment.create({
-      data: {
-        ...req.body,
-        userId: req.user!.id,
-        articleId: Number(req.params.articleId),
-      },
+    const Comment = await ArticleCommentRepository.createArticleComment({
+      ...req.body,
+      userId: req.user!.id,
+      articleId: Number(req.params.articleId),
     });
     res.send(Comment);
   }
 
   static updateArticleComment: express.RequestHandler = async (req, res, next) => {
     try {
-      const id = parseInt(req.params.articleId);
-      const comment = await prisma.articleComment.findUnique({ where: { id: id } });
+      const id = Number(req.params.commentId);
+      const comment = await ArticleCommentRepository.getArticleCommentByIdOrThrow(id);
       if (!comment) {
-        const err = new AppError('comment를 찾을 수 없습니다.');
+        const err = new Error('comment를 찾을 수 없습니다.');
         err.status = 404;
         return next(err);
       }
       if (comment.userId !== req.user!.id) {
-        const err = new AppError('인증되지 않은 사용자입니다.');
+        const err = new Error('인증되지 않은 사용자입니다.');
         err.status = 401;
         return next(err);
       }
-      const updatedComment = await prisma.articleComment.update({
-        where: { id: id },
-        data: req.body,
-      });
+      const updatedComment = await ArticleCommentRepository.updateArticleComment({ ...req.body }, id);
       res.send(updatedComment);
     } catch (err) {
-      if ((err as AppError).code === 'P2025') {
-        const error = new AppError('ID not found');
+      if ((err as Error).code === 'P2025') {
+        const error = new Error('ID not found');
         error.status = 404;
         return next(error);
       }
@@ -73,25 +54,23 @@ class ArticleCommentService {
 
   static deleteArticleComment: express.RequestHandler = async (req, res, next) => {
     try {
-      const id = parseInt(req.params.articleId);
-      const comment = await prisma.articleComment.findUnique({ where: { id: id } });
+      const id = Number(req.params.commentId);
+      const comment = await ArticleCommentRepository.getArticleCommentByIdOrThrow(id);
       if (!comment) {
-        const err = new AppError('comment를 찾을 수 없습니다.');
+        const err = new Error('comment를 찾을 수 없습니다.');
         err.status = 404;
         return next(err);
       }
       if (comment.userId !== req.user!.id) {
-        const err = new AppError('인증되지 않은 사용자입니다.');
+        const err = new Error('인증되지 않은 사용자입니다.');
         err.status = 401;
         return next(err);
       }
-      await prisma.articleComment.delete({
-        where: { id : id },
-      });
+      await ArticleCommentRepository.deleteArticleComment(id);
       res.sendStatus(204);
     } catch (err) {
-      if ((err as AppError).code === 'P2025') {
-        const error = new AppError('ID not found');
+      if ((err as Error).code === 'P2025') {
+        const error = new Error('ID not found');
         error.status = 404;
         return next(error);
       }

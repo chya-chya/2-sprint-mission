@@ -5,7 +5,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { notFoundErrorHandeler, errorHandler } from './utills/errorHandler'
 import passport from 'passport';
-import ArticleController from './controller/article-controller';
+import { articleRoute } from './controller/article-controller';
 import ProductController from './controller/product-controller';
 import FileController from './controller/file-controller';
 import userController from './controller/user-controller';
@@ -21,9 +21,8 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(passport.initialize());
 
-
-app.use('/article', ArticleController);
-app.use('/produtc', ProductController);
+app.use('/article', articleRoute);
+app.use('/product', ProductController);
 app.use('/file', FileController);
 app.use('/user', userController);
 app.use('', notFoundErrorHandeler);

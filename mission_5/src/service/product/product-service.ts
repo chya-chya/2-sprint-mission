@@ -2,6 +2,7 @@ import express from 'express';
 import prisma from '../../utills/prisma';
 import { assert } from 'superstruct';
 import { CreateProduct, PatchProduct } from '../../utills/structs';
+import ProductRepository from '../../repository/product/product-repository';
 
 class ProductService {
   
@@ -23,40 +24,32 @@ class ProductService {
       default:
         orderBy = { createdAt: 'desc'};
     }
-    const product = await prisma.product.findMany({
-      orderBy,
-      skip: Number(offset),
-      take: Number(limit),
-      where: {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' }},
-          { description: { contains: search, mode: 'insensitive' }},
-        ],
-      },
-      select: {
-        id: true,
-        name: true, 
-        description: false,
-        price: true,
-        tags: false,
-        createdAt: true,
-        updatedAt: false,
-        productLiked: true,
-      },
-    });
-    if (product.length === 0) {
+    const select = {
+      id: true,
+      name: true, 
+      description: false,
+      price: true,
+      tags: false,
+      createdAt: true,
+      updatedAt: false,
+      productLiked: true,
+    }
+    const products = await ProductRepository.getProducts(Number(offset), Number(limit), orderBy, search, select);
+    if (products === null) {
       res.status(200).json({ message: `${search}로 검색된 게시글이 없습니다. (offset: ${offset})` });
       return;
     }
-    
-    const response = product.map((product) => {
+    if (products instanceof Error) {
+      return next(products);
+    }
+    const response = products.map((product) => {
       let isLiked = false;
       if (req.user) {
         isLiked = product.productLiked.some((liked) => liked.userId === req.user?.id) ?? false;
       }
       const { productLiked, ...rest } = product;
       const productData = {
-        ...rest,
+        ...rest,      
         isLiked: isLiked
       };
       return productData;
@@ -68,11 +61,13 @@ class ProductService {
   static createProduct: express.RequestHandler = async (req, res, next) => {
     try {
       assert(req.body, CreateProduct);
-      const product = await prisma.product.create({
-        data: {
-          ...req.body,
-          userId: req.user!.id
-        },
+      const product = await ProductRepository.createProduct({
+        ...req.body,
+        user: {
+          connect: {
+            id: req.user!.id
+          }
+        }
       });
       res.send(product);
     } catch (err) {
@@ -82,9 +77,7 @@ class ProductService {
 
   static getProductById: express.RequestHandler = async (req, res, next) => {
     const id = parseInt(req.params.id);
-    const product = await prisma.product.findUnique({
-      where: { id: id },
-      select: {
+    const select = {
       id: true,
       name: true, 
       description: true,
@@ -93,8 +86,8 @@ class ProductService {
       createdAt: true,
       updatedAt: false,
       productLiked: true,
-      },
-    });
+    }
+    const product = await ProductRepository.getProductByIdOrThrow(id, select);
     if (!product) {
       const err = new Error('product를 찾을 수 없습니다.');
       err.status = 404;
@@ -117,12 +110,24 @@ class ProductService {
       try {
         assert(req.body, PatchProduct);
         const id = Number(req.params.id);
-        const product = await prisma.product.findUnique({ where: { id } });
+        const select = {
+          id: true,
+          name: true, 
+          description: true,
+          price: true,
+          tags: true,
+          createdAt: true,
+          updatedAt: false,
+          userId: true,
+        }
+        const product = await ProductRepository.getProductByIdOrThrow(id, select);
         if (!product) {
           const err = new Error('product를 찾을 수 없습니다.');
           err.status = 404;
           return next(err);
         }
+        console.log(`product.userId: ${product.userId}`);
+        console.log(`req.user!.id: ${req.user!.id}`);
         if (product.userId !== req.user!.id) {
           const err = new Error('인증되지 않은 사용자입니다.');
           err.status = 401;

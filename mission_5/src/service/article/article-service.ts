@@ -6,6 +6,7 @@ import {
   CreateArticle,
   PatchArticle 
 } from '../../utills/structs';
+import ArticleRepository from '../../repository/article/article-repository';
 
 class ArticleService {
 
@@ -27,26 +28,10 @@ class ArticleService {
       default:
         orderBy = { createdAt: 'desc' };
     }
-    const articles = await prisma.article.findMany({
-      orderBy,
-      skip: Number(offset),
-      take: Number(limit),
-      where: {
-        OR: [
-          { title: { contains: search, mode: 'insensitive' }},
-          { content: { contains: search, mode: 'insensitive' }},
-        ],
-      },
-      select: {
-      id: true,
-      title: true,   
-      content: true,
-      createdAt: true,
-      updatedAt: true, 
-      userId: true,    
-      articleLiked: true,
-      },
-    });
+    const articles = await ArticleRepository.getArticlelist(Number(offset), Number(limit), orderBy, search);
+    if (articles instanceof Error) {
+        return next(articles);
+    }
     if (articles.length === 0) {
         res.send({ message : `${search}로 검색된 게시글이 없습니다. (offset: ${offset})`});
         return;
@@ -69,11 +54,11 @@ class ArticleService {
   static createArticle: express.RequestHandler = async (req, res, next) => {
     try {
       assert(req.body, CreateArticle);
-      const article = await prisma.article.create({
-        data: {
-          ...req.body,
-          userId: req.user!.id,
-        },
+      const article = await ArticleRepository.createArticle({
+        ...req.body,
+        user: {
+          connect: { id: req.user!.id }
+        }
       });
       res.send(article);
     } catch (err) {
@@ -82,24 +67,8 @@ class ArticleService {
   }
 
   static getArticleById: express.RequestHandler = async (req, res, next) => {
-    const id = parseInt(req.params.id);
-    const article = await prisma.article.findUnique({
-      where: { id: id },
-      select: {
-      id: true,     
-      title: true,   
-      content: true,
-      createdAt: true,
-      updatedAt: false,
-      userId: false,
-      articleLiked: true,
-      },
-    });
-    if (!article) {
-      const err = new Error('article을 찾을 수 없습니다.');
-      err.status = 404;
-      return next(err);
-    }
+    const articleId = Number(req.params.articleId);
+    const article = await ArticleRepository.getArticleByIdOrThrow(articleId);
     let isLiked = false;
     if (req.user) {
       isLiked = article.articleLiked?.some((liked) => liked.userId === req.user?.id) ?? false;
@@ -115,52 +84,33 @@ class ArticleService {
   static updateArticle: express.RequestHandler = async (req, res, next) => {
     try {
       assert(req.body, PatchArticle);
-      const id = Number(req.params.id);
-      const article = await prisma.article.findUnique({ where: { id: id } });
-      if (!article) {
-        const err = new Error('article을 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
+      const articleId = Number(req.params.articleId);
+      const article = await ArticleRepository.getArticleByIdOrThrow(articleId);
       if (article.userId !== req.user?.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
         err.status = 401;
-        return next(err);
+        return next(err as Error);
       }
-      const updatedArticle = await prisma.article.update({
-        where: { id: id },
-        data: req.body,
-      });
+      const updatedArticle = await ArticleRepository.updateArticle(articleId, req.body);
       res.send(updatedArticle);
     } catch (err) {
-      return next(err);
+      return next(err as Error);
     }
   }
 
   static deleteArticle: express.RequestHandler  = async (req, res, next) => {
     try {
-    const id = Number(req.params.id);
-    const article = await prisma.article.findUnique({ where: { id: id } });
-    if (!article) {
-      const err = new Error('article을 찾을 수 없습니다.');
-      err.status = 404;
-      return next(err);
-    }
+    const articleId = Number(req.params.articleId);
+    const article = await ArticleRepository.getArticleByIdOrThrow(articleId);
     if (article.userId !== req.user!.id) {
       const err = new Error('인증되지 않은 사용자입니다.');
       err.status = 401;
       return next(err);
     }
-    await prisma.article.delete({
-      where: { id },
-    });
-      res.sendStatus(204);
+    await ArticleRepository.deleteArticle(articleId);
+    res.sendStatus(204);
     } catch (err) {
-      if ((err as Error).code === 'P2025') { // Prisma의 RecordNotFound 에러
-        const error = new Error('article을 찾을 수 없습니다.');
-        error.status = 404;      return next(error);
-      }
-      next(err);
+      return next(err as Error);
     }
   }
 }
