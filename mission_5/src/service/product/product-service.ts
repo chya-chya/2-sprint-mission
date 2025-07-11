@@ -1,5 +1,4 @@
 import express from 'express';
-import prisma from '../../utills/prisma';
 import { assert } from 'superstruct';
 import { CreateProduct, PatchProduct } from '../../utills/structs';
 import ProductRepository from '../../repository/product/product-repository';
@@ -76,7 +75,7 @@ class ProductService {
   }
 
   static getProductById: express.RequestHandler = async (req, res, next) => {
-    const id = parseInt(req.params.id);
+    const id = Number(req.params.id);
     const select = {
       id: true,
       name: true, 
@@ -133,10 +132,7 @@ class ProductService {
           err.status = 401;
           return next(err);
         }
-        const updatedProduct = await prisma.product.update({
-          where: { id: id },
-          data: req.body,
-        });
+        const updatedProduct = await ProductRepository.updateProduct(id, req.body);
         res.send(updatedProduct);
       } catch (err) {
         return next(err);
@@ -147,7 +143,17 @@ class ProductService {
   static deleteProduct: express.RequestHandler = async (req, res, next) => {
     try {
       const id = Number(req.params.id);
-      const product = await prisma.product.findUnique({ where: { id } });
+      const select = {
+        id: true,
+        name: true, 
+        description: true,
+        price: true,
+        tags: true,
+        createdAt: true,
+        updatedAt: false,
+        userId: true,
+      }
+      const product = await ProductRepository.getProductByIdOrThrow(id, select);
       if (!product) {
         const err = new Error('product를 찾을 수 없습니다.');
         err.status = 404;
@@ -158,9 +164,7 @@ class ProductService {
         err.status = 401;
         return next(err);
       }
-      await prisma.product.delete({
-        where: { id: id },
-      });
+      await ProductRepository.deleteProduct(id);
       res.sendStatus(204);
     } catch (err) {
       if ((err as Error).code === 'P2025') { // Prisma의 RecordNotFound 에러

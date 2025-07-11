@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import isemail from 'is-email';
 import { generateTokens } from '../../utills/token';
 import dotenv from 'dotenv';
-
+import UserRepository from '../../repository/user/user-repository';
 dotenv.config();
 
 class AuthService {
@@ -35,19 +35,20 @@ class AuthService {
 
   static unRegister: express.RequestHandler = async (req, res, next) => {
     try {
-      const user = await prisma.user.findUnique({ where: { id: req.user!.id}});
+      const user = await UserRepository.getUserById(req.user!.id);
       if (!user) {
         const err = new Error('user를 찾을 수 없습니다.');
         err.status = 404;
         return next(err);
       }
+      if (user instanceof Error) {
+        return next(user);
+      } 
       const isMatch = await bcrypt.compare(req.body.password, user.password);
       if (!isMatch) {
         return next(new Error('비밀번호가 일치하지 않습니다.'));
       }
-      await prisma.user.delete({
-        where: { id: req.user!.id },
-      });
+      await UserRepository.deleteUser(req.user!.id);
       res.send({ message: 'user가 삭제되었습니다.' });
     } catch (err) {
       next(err);
@@ -56,7 +57,20 @@ class AuthService {
 
   static login: express.RequestHandler = async (req, res, next) => {
     try {
-      const { accessToken, refreshToken } = generateTokens(req.user!.id);
+      const user = await UserRepository.getUserByEmail(req.body!.email);
+      if (!user) {
+        const err = new Error('user를 찾을 수 없습니다.');
+        err.status = 404;
+        return next(err);
+      }
+      if (user instanceof Error) {
+        return next(user);
+      }
+      const isMatch = await bcrypt.compare(req.body.password, user.password);
+      if (!isMatch) {
+        return next(new Error('비밀번호가 일치하지 않습니다.'));
+      }
+      const { accessToken, refreshToken } = generateTokens(user.id);
       AuthService.setTokenCookies(res, accessToken, refreshToken);
       res.status(200).json({ message: '로그인 성공' });
     } catch (err) {

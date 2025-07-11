@@ -66,6 +66,15 @@ class ArticleRepository {
       return err as Error;
     }
   }
+
+  static getUserArticles = async (userId: number) => {
+    try {
+      const articles = await prisma.article.findMany({ where: { userId: userId } });
+      return articles;
+    } catch(err) {
+      return err as Error;
+    }
+  }
 }
 
 export default ArticleRepository;

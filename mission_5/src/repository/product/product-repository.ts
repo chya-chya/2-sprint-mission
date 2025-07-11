@@ -62,6 +62,15 @@ class ProductRepository {
       return err as Error;
     }
   }
+
+  static getUserProducts = async (userId: number) => {
+    try {
+      const products = await prisma.product.findMany({ where: { userId: userId } });
+      return products;
+    } catch(err) {
+      return err as Error;
+    }
+  }
 }
   
 export default ProductRepository;
