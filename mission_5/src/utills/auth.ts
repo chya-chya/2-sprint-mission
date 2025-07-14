@@ -7,9 +7,6 @@ dotenv.config();
 export const optionalAuth: express.RequestHandler = (req, res, next) => {
   if(req.headers.cookie && req.headers.cookie.includes(process.env.ACCESS_TOKEN_COOKIE_NAME as string)) {
     passport.authenticate('access-token', { session: false, failWithError: true }, (err: Error, user: any) => {
-      if (err) { // 토큰 인증 에러시에도 진행
-        return next();
-      }
       if (user) { // 토큰 인증 성공시 진행
         req.user = user;
       }

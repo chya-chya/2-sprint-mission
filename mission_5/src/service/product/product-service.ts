@@ -129,7 +129,7 @@ class ProductService {
         console.log(`req.user!.id: ${req.user!.id}`);
         if (product.userId !== req.user!.id) {
           const err = new Error('인증되지 않은 사용자입니다.');
-          err.status = 401;
+          err.status = 403;
           return next(err);
         }
         const updatedProduct = await ProductRepository.updateProduct(id, req.body);
@@ -161,7 +161,7 @@ class ProductService {
       }
       if (product.userId !== req.user!.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
-        err.status = 401;
+        err.status = 403;
         return next(err);
       }
       await ProductRepository.deleteProduct(id);

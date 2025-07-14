@@ -88,7 +88,7 @@ class ArticleService {
       const article = await ArticleRepository.getArticleByIdOrThrow(articleId);
       if (article.userId !== req.user?.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
-        err.status = 401;
+        err.status = 403;
         return next(err as Error);
       }
       const updatedArticle = await ArticleRepository.updateArticle(articleId, req.body);
@@ -104,7 +104,7 @@ class ArticleService {
     const article = await ArticleRepository.getArticleByIdOrThrow(articleId);
     if (article.userId !== req.user!.id) {
       const err = new Error('인증되지 않은 사용자입니다.');
-      err.status = 401;
+      err.status = 403;
       return next(err);
     }
     await ArticleRepository.deleteArticle(articleId);

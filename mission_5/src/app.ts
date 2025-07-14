@@ -25,9 +25,9 @@ app.use('/article', articleRoute);
 app.use('/product', ProductController);
 app.use('/file', FileController);
 app.use('/user', userController);
-app.use('', notFoundErrorHandeler);
-app.use('', errorHandler)
-app.use('/', (req, res) => {
+app.use(notFoundErrorHandeler);
+app.use(errorHandler)
+app.use('/', (req: express.Request, res: express.Response) => {
   res.send('Hello World!');
 });
 

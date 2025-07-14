@@ -37,7 +37,7 @@ class ArticleCommentService {
       }
       if (comment.userId !== req.user!.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
-        err.status = 401;
+        err.status = 403;
         return next(err);
       }
       const updatedComment = await ArticleCommentRepository.updateArticleComment({ ...req.body }, id);
@@ -63,7 +63,7 @@ class ArticleCommentService {
       }
       if (comment.userId !== req.user!.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
-        err.status = 401;
+        err.status = 403;
         return next(err);
       }
       await ArticleCommentRepository.deleteArticleComment(id);
