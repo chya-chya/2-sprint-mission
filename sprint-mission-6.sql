@@ -28,7 +28,7 @@ LIMIT 10 OFFSET 0;
 SELECT *
 FROM orders
 ORDER BY date DESC, time DESC
-LIMIT 10 OFFSET 4;
+LIMIT 10 OFFSET 40;
 
 -- 7. `orders` 테이블에서 커서 페이지네이션된 목록을 조회합니다. 페이지 크기가 10이고 최신순일때, `id` 값을 기준으로 커서를 사용합시다. 커서의 값이 `42`일 때 다음 페이지를 조회하세요.
 SELECT *
