@@ -10,7 +10,7 @@ class ProductLikedRepository {
       });
       return productLiked;
     } catch(err) {
-      return err as Error;
+      throw err as Error;
     }
   }
 

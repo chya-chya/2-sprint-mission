@@ -1,6 +1,6 @@
 import express from 'express';
-import prisma from '../../utills/prisma';
 import ArticleLikedRepository from '../../repository/article/article-liked-repository';
+import ArticleRepository from '../../repository/article/article-repository';
 
 class ArticleLikedService {
 
@@ -15,6 +15,7 @@ class ArticleLikedService {
     
   static createArticleLiked: express.RequestHandler = async (req, res, next) => {
     try {
+      await ArticleRepository.getArticleByIdOrThrow(Number(req.params.articleId));
       const articleLiked = await ArticleLikedRepository.getArticleLiked(Number(req.params.articleId), Number(req.user!.id));
       if (articleLiked !== null) {
         return next(new Error('이미 좋아요를 눌렀습니다.'));

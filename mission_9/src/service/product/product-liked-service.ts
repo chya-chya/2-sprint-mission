@@ -1,6 +1,7 @@
 import express from 'express';
 import prisma from '../../utills/prisma';
 import ProductLikedRepository from '../../repository/product/product-liked-repository';
+import productRepository from '../../repository/product/product-repository';
 class ProductLikedService {
 
   static getProductLiked: express.RequestHandler = async (req, res, next) => {
@@ -14,6 +15,7 @@ class ProductLikedService {
 
   static createProductLiked: express.RequestHandler = async (req, res, next) => {
     try {
+      await productRepository.getProductByIdOrThrow(Number(req.params.productId));
       const productLiked = await ProductLikedRepository.getProductLikedById(Number(req.user!.id), Number(req.params.productId));
       if (productLiked) {
         return next(new Error('이미 좋아요를 눌렀습니다.'));
@@ -32,7 +34,7 @@ class ProductLikedService {
         return next(new Error('좋아요를 찾을 수 없습니다.'));
       }
       await ProductLikedRepository.deleteProductLiked(Number(req.user!.id), Number(req.params.productId));
-      res.send({ message: '좋아요를 취소했습니다.' });
+      res.status(204).send({ message: '좋아요를 취소했습니다.' });
     } catch (err) {
       next(err);
     }

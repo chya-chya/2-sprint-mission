@@ -20,7 +20,7 @@ class ProductCommentRepository {
       });
       return comments;
     } catch(err) {
-      return err as Error;
+      throw err as Error;
     }
   }
 
@@ -42,7 +42,7 @@ class ProductCommentRepository {
       const newProductComment = await prisma.productComment.create({ data: productComment });
       return newProductComment;
     } catch(err) {
-      return err as Error;
+      throw err as Error;
     }
   }
 
@@ -51,7 +51,7 @@ class ProductCommentRepository {
       const updatedProductComment = await prisma.productComment.update({ where: { id: id }, data: productComment });
       return updatedProductComment;
     } catch(err) {
-      return err as Error;
+      throw err as Error;
     }
   }
 
@@ -60,7 +60,7 @@ class ProductCommentRepository {
       const deletedProductComment = await prisma.productComment.delete({ where: { id: id } });
       return deletedProductComment;
     } catch(err) {
-      return err as Error;
+      throw err as Error;
     }
   }
 }

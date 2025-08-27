@@ -1,5 +1,4 @@
 import express from 'express';
-import prisma from '../../utills/prisma';
 import bcrypt from 'bcrypt';
 import UserRepository from '../../repository/user/user-repository';
 import ProductRepository from '../../repository/product/product-repository';
@@ -9,15 +8,10 @@ class UserService {
   static getUser: express.RequestHandler = async(req, res, next) => {
     try {
       const user = await UserRepository.getUserById(req.user!.id);
-      if (!user) {
-        const err = new Error('user를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
       if (user instanceof Error) {
         return next(user);
       }
-      const { password, ...rest } = user;
+      const { password, ...rest } = user!;
       res.send(rest);
     } catch(err) {
       next(err);
@@ -30,11 +24,6 @@ class UserService {
         return next(new Error('비밀번호는 변경할 수 없습니다.'));
       }
       const user = await UserRepository.getUserById(req.user!.id);
-      if (!user) {
-        const err = new Error('user를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
       if (user instanceof Error) {
         return next(user);
       }
@@ -45,7 +34,7 @@ class UserService {
       if (updatedUser instanceof Error) {
         return next(updatedUser);
       }
-      const { password, ...rest} = updatedUser;
+      const { password, ...rest } = updatedUser!;
       res.send(rest);
     } catch(err) {
       next(err);
@@ -56,17 +45,13 @@ class UserService {
     try {
       const newHashedPassword = await bcrypt.hash(req.body.newPassword, 10);
       const user = await UserRepository.getUserById(req.user!.id);
-      if (!user) {
-        const err = new Error('user를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
       if (user instanceof Error) {
         return next(user);
       }
-      const isMatch = await bcrypt.compare(req.body.password, user.password);
+      const isMatch = await bcrypt.compare(req.body.password, user!.password);
       if (!isMatch) {
-        return next(new Error('현재 비밀번호가 일치하지 않습니다.'));
+        res.status(401).send({ message: '현재 비밀번호가 일치하지 않습니다.' });
+        return;
       }
       await UserRepository.updateUser(req.user!.id, {
         password: newHashedPassword,

@@ -22,12 +22,16 @@ class ProductCommentService {
   }
 
   static createProductComment: express.RequestHandler = async (req, res, next) => {
-    const commnt = await ProductCommentRepository.createProductComment({
-      ...req.body,
-      userId: req.user!.id,
-      productId:  parseInt(req.params.productId),
-    });
-    res.send(commnt);
+    try {
+      const commnt = await ProductCommentRepository.createProductComment({
+        ...req.body,
+        userId: req.user!.id,
+        productId:  parseInt(req.params.productId),
+      });
+      res.send(commnt);
+    } catch (err) {
+      next(err);
+    }
   }
 
   static updateProductComment: express.RequestHandler = async (req, res, next) => {

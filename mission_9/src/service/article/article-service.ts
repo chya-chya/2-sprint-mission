@@ -1,6 +1,5 @@
 import express from 'express';
 import { assert } from 'superstruct';
-import prisma from '../../utills/prisma';
 import { Article } from '@prisma/client';
 import { 
   CreateArticle,
@@ -33,7 +32,7 @@ class ArticleService {
         return next(articles);
     }
     if (articles.length === 0) {
-        res.send({ message : `${search}로 검색된 게시글이 없습니다. (offset: ${offset})`});
+        res.send({ message : "게시글이 없습니다."});
         return;
     }
     const response = articles.map((article) => {

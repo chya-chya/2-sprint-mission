@@ -11,6 +11,10 @@ class AuthService {
   static register: express.RequestHandler = async (req, res, next) => {
     try {
       const { email, nickname, password } = req.body;
+      if (!email) {
+        res.status(400).send('이메일이 필요합니다.');
+        return;
+      }
       if (!isemail(email)) {
         res.status(400).send('이메일 형식이 올바르지 않습니다.');
         return;
@@ -19,13 +23,20 @@ class AuthService {
         res.status(400).send('비밀번호가 필요합니다.');
         return;
       }
+      if (!nickname) {
+        res.status(400).send('닉네임이 필요합니다.');
+        return;
+      }
+      const emailUser = await UserRepository.getUserByEmail(email);
+      if (emailUser) {
+        res.status(400).send('이메일이 중복됩니다.');
+        return;
+      }
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await prisma.user.create({
-        data: {
-          email,
-          nickname,
-          password: hashedPassword,
-        },  
+      const user = await UserRepository.createUser({
+        email,
+        nickname,
+        password: hashedPassword,
       });
       res.status(201).json({ message: '회원가입 성공' });
     } catch (err) {
@@ -36,20 +47,16 @@ class AuthService {
   static unRegister: express.RequestHandler = async (req, res, next) => {
     try {
       const user = await UserRepository.getUserById(req.user!.id);
-      if (!user) {
-        const err = new Error('user를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
       if (user instanceof Error) {
         return next(user);
       } 
-      const isMatch = await bcrypt.compare(req.body.password, user.password);
+      const isMatch = await bcrypt.compare(req.body.password, user!.password);
       if (!isMatch) {
-        return next(new Error('비밀번호가 일치하지 않습니다.'));
+        res.status(401).send('비밀번호가 일치하지 않습니다.');
+        return;
       }
       await UserRepository.deleteUser(req.user!.id);
-      res.send({ message: 'user가 삭제되었습니다.' });
+      res.status(200).send({ message: 'user가 삭제되었습니다.' });
     } catch (err) {
       next(err);
     }
@@ -59,16 +66,16 @@ class AuthService {
     try {
       const user = await UserRepository.getUserByEmail(req.body!.email);
       if (!user) {
-        const err = new Error('user를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
+        res.status(404).send('user를 찾을 수 없습니다.');
+        return;
       }
       if (user instanceof Error) {
         return next(user);
       }
       const isMatch = await bcrypt.compare(req.body.password, user.password);
       if (!isMatch) {
-        return next(new Error('비밀번호가 일치하지 않습니다.'));
+        res.status(401).send('비밀번호가 일치하지 않습니다.');
+        return;
       }
       const { accessToken, refreshToken } = generateTokens(user.id);
       AuthService.setTokenCookies(res, accessToken, refreshToken);

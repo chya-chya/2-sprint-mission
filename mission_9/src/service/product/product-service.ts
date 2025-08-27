@@ -22,7 +22,7 @@ class ProductService {
       case 'recent':
         orderBy = { createdAt: 'desc' };
         break;
-      case 'former':
+      case 'fomer':
         orderBy = { createdAt: 'asc' };
         break;
       default:
@@ -39,12 +39,12 @@ class ProductService {
       productLiked: true,
     }
     const products = await ProductRepository.getProducts(Number(offset), Number(limit), orderBy, search, select);
-    if (products === null) {
-      res.status(200).json({ message: `${search}로 검색된 게시글이 없습니다. (offset: ${offset})` });
-      return;
-    }
     if (products instanceof Error) {
       return next(products);
+    }
+    if (products.length === 0) {
+      res.status(200).json({ message: `${search}로 검색된 게시글이 없습니다. (offset: ${offset})` });
+      return;
     }
     const response = products.map((product) => {
       let isLiked = false;
@@ -80,7 +80,7 @@ class ProductService {
   }
 
   static getProductById: express.RequestHandler = async (req, res, next) => {
-    const id = Number(req.params.id);
+    const productId = Number(req.params.productId);
     const select = {
       id: true,
       name: true, 
@@ -91,12 +91,7 @@ class ProductService {
       updatedAt: false,
       productLiked: true,
     }
-    const product = await ProductRepository.getProductByIdOrThrow(id, select);
-    if (!product) {
-      const err = new Error('product를 찾을 수 없습니다.');
-      err.status = 404;
-      return next(err);
-    }
+    const product = await ProductRepository.getProductByIdOrThrow(productId, select);
     let isLiked = false;
     if (req.user) {
       isLiked = product.productLiked.some((liked) => liked.userId === req.user?.id) ?? false;
@@ -113,7 +108,7 @@ class ProductService {
   static updateProduct: express.RequestHandler = async (req, res, next) => {
       try {
         assert(req.body, PatchProduct);
-        const id = Number(req.params.productId);
+        const productId = Number(req.params.productId);
         const select = {
           id: true,
           name: true, 
@@ -124,18 +119,13 @@ class ProductService {
           updatedAt: false,
           userId: true,
         }
-        const product = await ProductRepository.getProductByIdOrThrow(id, select);
-        if (!product) {
-          const err = new Error('product를 찾을 수 없습니다.');
-          err.status = 404;
-          return next(err);
-        }
+        const product = await ProductRepository.getProductByIdOrThrow(productId, select);
         if (product.userId !== req.user!.id) {
           const err = new Error('인증되지 않은 사용자입니다.');
           err.status = 403;
           return next(err);
         }
-        const updatedProduct = await ProductRepository.updateProduct(id, req.body);
+        const updatedProduct = await ProductRepository.updateProduct(productId, req.body);
         if (updatedProduct instanceof Error) {
           return next(updatedProduct);
         }
@@ -155,7 +145,7 @@ class ProductService {
 
   static deleteProduct: express.RequestHandler = async (req, res, next) => {
     try {
-      const id = Number(req.params.id);
+      const productId = Number(req.params.productId);
       const select = {
         id: true,
         name: true, 
@@ -166,18 +156,13 @@ class ProductService {
         updatedAt: false,
         userId: true,
       }
-      const product = await ProductRepository.getProductByIdOrThrow(id, select);
-      if (!product) {
-        const err = new Error('product를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
+      const product = await ProductRepository.getProductByIdOrThrow(productId, select);
       if (product.userId !== req.user!.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
         err.status = 403;
         return next(err);
       }
-      await ProductRepository.deleteProduct(id);
+      await ProductRepository.deleteProduct(productId);
       res.sendStatus(204);
     } catch (err) {
       if ((err as Error).code === 'P2025') { // Prisma의 RecordNotFound 에러

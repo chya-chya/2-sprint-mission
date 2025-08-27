@@ -11,7 +11,6 @@ userController.delete('/unregister',
   authService.unRegister);
 userController.post('/login', 
   loginLimiter,
-  passport.authenticate('local', { session: false }),
   authService.login);
 userController.post('/refresh',
   passport.authenticate('refresh-token', { session: false }),

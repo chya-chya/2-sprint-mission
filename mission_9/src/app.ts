@@ -30,11 +30,11 @@ app.use('/product', ProductController);
 app.use('/file', FileController);
 app.use('/user', userController);
 app.use('/notification', notificationController);
-app.use(notFoundErrorHandeler);
-app.use(errorHandler)
-app.use('/', (req: express.Request, res: express.Response) => {
-  res.send('Hello World!');
+app.get('/', (req: express.Request, res: express.Response) => {
+  res.status(200).json({ message: 'Hello World!' });
 });
+app.use(notFoundErrorHandeler);
+app.use(errorHandler);
 
 // 웹소켓
 const server = http.createServer(app);
@@ -43,4 +43,7 @@ export const io = new Server(server, {
 });
 socket(io);
 
-server.listen(process.env.PORT || 3000, () => console.log(`Server Started on ${process.env.PORT || 3000}`));
+const port = process.env.NODE_ENV === 'test' ? 0 : (process.env.PORT || 3000);
+server.listen(port, () => console.log(`Server Started on ${port}`));
+
+export default app;

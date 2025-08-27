@@ -44,11 +44,6 @@ class ArticleCommentService {
     try {
       const id = Number(req.params.commentId);
       const comment = await ArticleCommentRepository.getArticleCommentByIdOrThrow(id);
-      if (!comment) {
-        const err = new Error('comment를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
       if (comment.userId !== req.user!.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
         err.status = 403;
@@ -70,11 +65,6 @@ class ArticleCommentService {
     try {
       const id = Number(req.params.commentId);
       const comment = await ArticleCommentRepository.getArticleCommentByIdOrThrow(id);
-      if (!comment) {
-        const err = new Error('comment를 찾을 수 없습니다.');
-        err.status = 404;
-        return next(err);
-      }
       if (comment.userId !== req.user!.id) {
         const err = new Error('인증되지 않은 사용자입니다.');
         err.status = 403;
