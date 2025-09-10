@@ -27,7 +27,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        run: cd mission_11 && npm install
 
       - name: Run tests
         env:
@@ -38,5 +38,5 @@ jobs:
           ACCESS_TOKEN_COOKIE_NAME: access-token,
           REFRESH_TOKEN_COOKIE_NAME: refresh-token,
           
-        run: npm run test
+        run: cd mission_11 && npm run test
 
