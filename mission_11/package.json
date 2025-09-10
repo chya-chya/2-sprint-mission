@@ -5,9 +5,9 @@
   "scripts": {
     "test": "dotenv -e .env.test -- prisma migrate dev && dotenv -e .env.test -- jest --runInBand --coverage --detectOpenHandles",
     "postinstall": "npx prisma generate && npx prisma migrate dev",
-    "dev": "nodemon --watch src --exec ts-node src/app.ts",
+    "dev": "nodemon --watch src --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/app.js",
+    "start": "node dist/server.js",
     "seed": "node prisma/seed.js"
   },
   "keywords": [],
