@@ -38,5 +38,5 @@ jobs:
           ACCESS_TOKEN_COOKIE_NAME: access-token,
           REFRESH_TOKEN_COOKIE_NAME: refresh-token,
           
-        run: cd mission_11 && npm run test
+        run: cd mission_11 && npx prisma migrate dev && npm run test
 
