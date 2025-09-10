@@ -27,6 +27,8 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/panda-market
         run: cd mission_11 && npm install
 
       - name: Run tests
