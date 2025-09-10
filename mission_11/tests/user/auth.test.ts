@@ -16,6 +16,7 @@ describe("유저 생성 테스트", () => {
 
   afterAll(async () => {
     await prisma.user.deleteMany();
+    await prisma.$disconnect();
   });
 
   test("유저 생성 성공", async () => {
