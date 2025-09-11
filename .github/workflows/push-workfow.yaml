@@ -26,13 +26,33 @@ jobs:
           port: 22
           script: |
             bash -lc "
-              cd /home/ubuntu/2-sprint-mission &&
-              git checkout main &&
-              git pull origin main &&
-              cd mission_11 &&
-              which npm &&
-              which node &&
-              npm ci &&
-              npm run build &&
-              pm2 restart all
+              set -e
+              export PATH=$PATH:/usr/bin:/usr/local/bin:/home/ubuntu/.nvm/versions/node/v22.19.0/bin
+              echo 'Current PATH: $PATH'
+              echo 'Current directory:'
+              pwd
+              echo 'Checking directory structure:'
+              ls -la /home/ubuntu/2-sprint-mission
+              cd /home/ubuntu/2-sprint-mission
+              echo 'Switching to main branch...'
+              git checkout main
+              echo 'Pulling latest changes...'
+              git pull origin main
+              echo 'Checking mission_11 directory:'
+              ls -la mission_11 || { echo 'Failed to find mission_11 directory'; exit 1; }
+              cd mission_11
+              echo 'Checking npm path:'
+              which npm || { echo 'npm not found'; exit 1; }
+              echo 'Node version:'
+              node -v
+              echo 'NPM version:'
+              npm -v
+              echo 'Installing dependencies...'
+              npm ci
+              echo 'Building project...'
+              npm run build
+              echo 'Checking PM2 installation:'
+              which pm2 || { echo 'PM2 not found, installing...'; npm install -g pm2; }
+              echo 'Restarting PM2 processes...'
+              pm2 restart all || { echo 'PM2 restart failed, listing processes...'; pm2 list; exit 1; }
             "
