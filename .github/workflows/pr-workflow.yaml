@@ -1,4 +1,4 @@
-name: pull request workflow
+name: pull request workflows
 
 on:
   pull_request:
@@ -27,16 +27,21 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/panda-market
+        run: cd mission_11 && npm ci
 
       - name: Run tests
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/panda-market
-          PORT: 3000,
-          JWT_ACCESS_TOKEN_SECRET: secret,
-          JWT_REFRESH_TOKEN_SECRET: secret,
-          ACCESS_TOKEN_COOKIE_NAME: access-token,
-          REFRESH_TOKEN_COOKIE_NAME: refresh-token,
-          
-        run: npm run test
+          PORT: 3000
+          JWT_ACCESS_TOKEN_SECRET: secret
+          JWT_REFRESH_TOKEN_SECRET: secret
+          ACCESS_TOKEN_COOKIE_NAME: access-token
+          REFRESH_TOKEN_COOKIE_NAME: refresh-token
+          AWS_REGION: ap-northeast-2
+          AWS_ACCESS_KEY_ID: dummy
+          AWS_SECRET_ACCESS_KEY: dummy
+          AWS_S3_BUCKET_NAME: dummy
+        run: cd mission_11 && npm run test
 

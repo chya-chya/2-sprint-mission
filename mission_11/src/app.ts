@@ -43,7 +43,4 @@ export const io = new Server(server, {
 });
 socket(io);
 
-const port = process.env.NODE_ENV === 'test' ? 0 : (process.env.PORT || 3000);
-server.listen(port, () => console.log(`Server Started on ${port}`));
-
 export default app;
