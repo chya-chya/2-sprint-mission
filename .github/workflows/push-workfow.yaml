@@ -24,7 +24,10 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
           port: 22
+          script_stop: true
           script: |
+            bash -lc "cd /home/ubuntu/2-sprint-mission && git checkout main && git pull origin main"
+            bash -lc "cd /home/ubuntu/2-sprint-mission/mission_11 && npm ci && npm run build && pm2 restart all"
             cd /home/ubuntu/2-sprint-mission
             git checkout main
             git pull origin main
