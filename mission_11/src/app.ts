@@ -31,7 +31,7 @@ app.use('/file', FileController);
 app.use('/user', userController);
 app.use('/notification', notificationController);
 app.get('/', (req: express.Request, res: express.Response) => {
-  res.status(200).json({ message: "welcome to sooyen server!" });
+  res.status(200).json({ message: "welcome to sooyen server2!" });
 });
 app.use(notFoundErrorHandeler);
 app.use(errorHandler);
