@@ -4,7 +4,6 @@
   "main": "index.js",
   "scripts": {
     "test": "dotenv -e .env.test -- prisma migrate dev && dotenv -e .env.test -- jest --runInBand --coverage --detectOpenHandles",
-    "postinstall": "npx prisma generate && npx prisma migrate dev",
     "dev": "nodemon --watch src --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",

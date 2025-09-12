@@ -3,6 +3,7 @@ import multer from 'multer';
 import multerS3 from 'multer-s3';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import path from "path";
 
 if (!process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
   throw new Error('AWS credentials are not properly configured');
@@ -64,6 +65,33 @@ class FileService {
       res.json({ url });
     } catch (err) {
       next(err);
+    }
+  }
+  static localUploadFile: express.RequestHandler = (req, res, next) => {
+    try {
+      const upload = multer({ dest: 'uploads/' }).single('file');
+      return upload(req, res, (err) => {
+        if (err) {
+          return next(err);
+        }
+        if (!req.file) {
+          return res.status(400).json({ error: '파일이 업로드되지 않았습니다.' });
+        } 
+        const file = req.file;
+        const fileKey = file.filename;
+        const fileUrl = `http://localhost/file/local/${fileKey}`;
+        return res.json({ fileKey, fileUrl });
+      });
+    } catch (err) {
+      return next(err);
+    }
+  }
+  static localGetFile: express.RequestHandler = (req, res, next) => {
+    try {
+      const filePath = path.resolve('uploads', req.params.fileKey);
+      return res.sendFile(filePath);
+    } catch (err) {
+      return next(err);
     }
   }
 }
